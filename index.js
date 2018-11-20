@@ -1,30 +1,18 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const keys = require('./config/keys');
+require('./models/User');
+require('./services/passport');
+
+
+mongoose.connect(keys.mongoURI);
+
+
+
 const app = express();
-const passport = require('passport');
-const GoogleStrategy = require ('passport-google-oauth20').Strategy;
-const keys = require('./config/keys')
+require('./routes/authRoutes')(app);
 
 
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: keys.googleClientID,
-      clientSecret: keys.googleClientSecret,
-      callbackURL: '/auth/google/callback'
-    },
-    (accessToken, refreshToken , profile ,done) => {
-      console.log(accessToken);
-      console.log(accessToken);
-    
-    }
-  )
-);
-
-app.get(
-  '/auth/google',
-  passport.authenticate('google',{
-  scope:['profile','email']
-}));
 
 
 
