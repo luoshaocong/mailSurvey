@@ -1,23 +1,31 @@
+
 const mongoose = require('mongoose');
-const  requireLogin = require('../middlewares/requireLogin');
-const  requireCredit = require('../middlewares/requireCredit');
+const requireLogin = require('../middlewares/requireLogin');
+const requireCredits = require('../middlewares/requireCredits');
+const Mailer = require('../services/Mailer');
+const surveyTemplate = require('../services/emailTemplates/surveyTemplate');
 
 const Survey = mongoose.model('surveys');
-  app.post('/api/surveys', requireLogin,requireCredit,(req, res) => {
+
+module.exports = app => {
+  app.post('/api/surveys', requireLogin, requireCredits, (req, res) => {
+    //es6 restructuring.
     const { title, subject, body, recipients } = req.body;
 
+
     const survey = new Survey({
-    //  titl:title
+
       title,
-      body,
       subject,
-      recipients: recipients.split(',').map(email => ({ email: email.trim() })),
+      body,
+      recipients: recipients.split(',').map(email => ({ email })),
+
       _user: req.user.id,
-      date:  Date.now()
-
-
+      dateSent: Date.now()
     });
 
 
+    const mailer = new Mailer(survey, surveyTemplate(survey));
+    mailer.send();
   });
 };
